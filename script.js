@@ -1,9 +1,9 @@
-const MIN_BET = 10;
-const MAX_PLAYERS = 8;
-const MIN_PLAYERS = 2;
-
 let pot = 0;
 let startingMoney = 100;
+let MIN_BET = 10;
+
+const MAX_PLAYERS = 8;
+const MIN_PLAYERS = 2;
 
 let players = [
   createPlayer("Player 1"),
@@ -15,7 +15,8 @@ function createPlayer(name) {
     name,
     wallet: startingMoney,
     active: true,
-    dealer: false
+    dealer: false,
+    customBet: MIN_BET
   };
 }
 
@@ -28,12 +29,13 @@ function renderPlayers() {
   players.forEach((p, i) => {
     const div = document.createElement("div");
     div.className = `player ${!p.active ? "broke" : ""} ${p.dealer ? "dealer" : ""}`;
-    
+
     div.innerHTML = `
       <span onclick="toggleDealer(${i})">${p.name}</span>
       <span class="wallet" id="wallet-${i}">$${p.wallet}</span>
-      <button onclick="declareWinner(${i})">WIN</button>
+      <input type="number" id="bet-${i}" value="${p.customBet}" min="${MIN_BET}" max="${p.wallet}">
       <button onclick="allIn(${i})">ALL IN</button>
+      <button onclick="declareWinner(${i})">WIN</button>
     `;
     playersDiv.appendChild(div);
   });
@@ -43,14 +45,12 @@ function renderPlayers() {
 function animateNumber(el, start, end) {
   let current = start;
   function step() {
+    if (current === end) return;
     const diff = end - current;
-    if (diff === 0) return;
-
-    // speed increases with larger amounts
-    const increment = Math.max(1, Math.floor(Math.abs(diff) / 5));
+    const increment = Math.max(1, Math.floor(Math.abs(diff)/5)); // faster for big numbers
     current += Math.sign(diff) * increment;
     el.textContent = `$${current}`;
-    setTimeout(step, 10); // 10ms delay
+    setTimeout(step, 10);
   }
   step();
 }
@@ -66,15 +66,18 @@ function takeAntes() {
   players.forEach((p, i) => {
     if (!p.active) return;
 
-    if (p.wallet < MIN_BET) {
-      p.active = false;
-      return;
-    }
+    // read custom bet or enforce minimum
+    const input = document.getElementById(`bet-${i}`);
+    let bet = Number(input.value);
+    if (isNaN(bet) || bet < MIN_BET) bet = MIN_BET;
+    if (bet > p.wallet) bet = p.wallet;
 
-    const old = p.wallet;
-    p.wallet -= MIN_BET;
-    updatePot(MIN_BET);
-    animateNumber(document.getElementById(`wallet-${i}`), old, p.wallet);
+    p.customBet = bet;
+    const oldWallet = p.wallet;
+    p.wallet -= bet;
+    if (p.wallet <= 0) p.active = false;
+    updatePot(bet);
+    animateNumber(document.getElementById(`wallet-${i}`), oldWallet, p.wallet);
   });
 }
 
@@ -89,10 +92,10 @@ function declareWinner(index) {
   playerDiv.classList.add("winner");
 
   animateNumber(document.getElementById(`wallet-${index}`), old, winner.wallet);
+
   pot = 0;
   potValue.textContent = "$0";
 
-  // remove winner flash after animation
   setTimeout(() => playerDiv.classList.remove("winner"), 3000);
 }
 
@@ -132,8 +135,10 @@ function toggleDealer(index) {
   renderPlayers();
 }
 
+// ---------------------- Game Reset ----------------------
 function resetGame() {
   startingMoney = Number(document.getElementById("startingMoney").value) || 100;
+  MIN_BET = Number(document.getElementById("minBet").value) || 10;
   pot = 0;
   potValue.textContent = "$0";
 
@@ -141,7 +146,8 @@ function resetGame() {
     ...p,
     wallet: startingMoney,
     active: true,
-    dealer: i === 0
+    dealer: i === 0,
+    customBet: MIN_BET
   }));
 
   renderPlayers();

@@ -8,18 +8,24 @@ body {
 }
 
 #terminal {
-  width: 800px;
-  border: 2px solid #00ff99;
-  padding: 20px;
+  width: 900px;
+  border: 3px solid #00ff99;
+  padding: 30px;
+  font-size: 18px;
 }
 
 h1 {
   text-align: center;
+  font-size: 32px;
+}
+
+#settings label {
+  margin-right: 20px;
 }
 
 #pot {
   border: 2px dashed #00ff99;
-  height: 120px;
+  height: 150px;
   margin: 20px 0;
   display: flex;
   justify-content: center;
@@ -28,7 +34,7 @@ h1 {
 }
 
 #pot-value {
-  font-size: 32px;
+  font-size: 36px;
 }
 
 .player {
@@ -71,6 +77,11 @@ h1 {
 .wallet {
   min-width: 120px;
   text-align: right;
+}
+
+input[type="number"] {
+  width: 80px;
+  margin-left: 5px;
 }
 
 button {

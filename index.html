@@ -9,6 +9,18 @@
   <div id="terminal">
     <h1>◆ POT TRACKER ◆</h1>
 
+    <div id="settings">
+      <label>Starting Money:
+        <input type="number" id="startingMoney" value="100" min="1">
+      </label>
+      <label>Pot Minimum:
+        <input type="number" id="minBet" value="10" min="1">
+      </label>
+      <button onclick="resetGame()">RESET GAME</button>
+      <button onclick="addPlayer()">ADD PLAYER</button>
+      <button onclick="removePlayer()">REMOVE PLAYER</button>
+    </div>
+
     <div id="pot">
       <div id="pot-value">$0</div>
     </div>
@@ -16,12 +28,6 @@
     <div id="players"></div>
 
     <div id="controls">
-      <label>Starting Money:
-        <input type="number" id="startingMoney" value="100" min="1">
-      </label>
-      <button onclick="resetGame()">RESET GAME</button>
-      <button onclick="addPlayer()">ADD PLAYER</button>
-      <button onclick="removePlayer()">REMOVE PLAYER</button>
       <button onclick="nextRound()">NEXT ROUND</button>
     </div>
   </div>
