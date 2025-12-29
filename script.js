@@ -22,32 +22,36 @@ function createPlayer(name) {
 const playersDiv = document.getElementById("players");
 const potValue = document.getElementById("pot-value");
 
+// ---------------------- Rendering ----------------------
 function renderPlayers() {
   playersDiv.innerHTML = "";
   players.forEach((p, i) => {
     const div = document.createElement("div");
     div.className = `player ${!p.active ? "broke" : ""} ${p.dealer ? "dealer" : ""}`;
-
+    
     div.innerHTML = `
       <span onclick="toggleDealer(${i})">${p.name}</span>
       <span class="wallet" id="wallet-${i}">$${p.wallet}</span>
       <button onclick="declareWinner(${i})">WIN</button>
+      <button onclick="allIn(${i})">ALL IN</button>
     `;
     playersDiv.appendChild(div);
   });
 }
 
+// ---------------------- Animations ----------------------
 function animateNumber(el, start, end) {
   let current = start;
-  const speed = 10; // faster
+  function step() {
+    const diff = end - current;
+    if (diff === 0) return;
 
-  const step = () => {
-    current += Math.sign(end - current) * Math.max(1, Math.floor(Math.abs(end - current) / 10));
+    // speed increases with larger amounts
+    const increment = Math.max(1, Math.floor(Math.abs(diff) / 5));
+    current += Math.sign(diff) * increment;
     el.textContent = `$${current}`;
-    if (current !== end) {
-      setTimeout(step, speed);
-    }
-  };
+    setTimeout(step, 10); // 10ms delay
+  }
   step();
 }
 
@@ -57,6 +61,7 @@ function updatePot(amount) {
   animateNumber(potValue, old, pot);
 }
 
+// ---------------------- Game Logic ----------------------
 function takeAntes() {
   players.forEach((p, i) => {
     if (!p.active) return;
@@ -80,9 +85,27 @@ function declareWinner(index) {
   const old = winner.wallet;
   winner.wallet += pot;
 
+  const playerDiv = playersDiv.children[index];
+  playerDiv.classList.add("winner");
+
   animateNumber(document.getElementById(`wallet-${index}`), old, winner.wallet);
   pot = 0;
   potValue.textContent = "$0";
+
+  // remove winner flash after animation
+  setTimeout(() => playerDiv.classList.remove("winner"), 3000);
+}
+
+function allIn(index) {
+  const p = players[index];
+  if (!p.active || p.wallet === 0) return;
+
+  const old = p.wallet;
+  updatePot(p.wallet);
+  p.wallet = 0;
+  p.active = false;
+  animateNumber(document.getElementById(`wallet-${index}`), old, p.wallet);
+  renderPlayers();
 }
 
 function nextRound() {
@@ -90,6 +113,7 @@ function nextRound() {
   renderPlayers();
 }
 
+// ---------------------- Player Management ----------------------
 function addPlayer() {
   if (players.length >= MAX_PLAYERS) return;
   players.push(createPlayer(`Player ${players.length + 1}`));
@@ -123,4 +147,5 @@ function resetGame() {
   renderPlayers();
 }
 
+// ---------------------- Init ----------------------
 renderPlayers();
