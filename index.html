@@ -1,37 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Card Pot Tracker</title>
+  <meta charset="UTF-8">
+  <title>Terminal Poker / Blackjack Pot Tracker</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="terminal">
-    <h1>◆ POT TRACKER ◆</h1>
 
-    <div id="settings">
-      <label>Starting Money:
-        <input type="number" id="startingMoney" value="100" min="1">
-      </label>
-      <label>Pot Minimum:
-        <input type="number" id="minBet" value="10" min="1">
-      </label>
-      <button onclick="resetGame()">RESET GAME</button>
-      <button onclick="addPlayer()">ADD PLAYER</button>
-      <button onclick="removePlayer()">REMOVE PLAYER</button>
-    </div>
+<div class="terminal">
+  <h1>💰 POT TRACKER</h1>
 
-    <div id="pot">
-      <div id="pot-value">$0</div>
-    </div>
+  <div class="controls">
+    <label>Starting Money $
+      <input type="number" id="startingMoney" value="100">
+    </label>
 
-    <div id="players"></div>
+    <label>Minimum Bet $
+      <input type="number" id="minBet" value="10">
+    </label>
 
-    <div id="controls">
-      <button onclick="nextRound()">NEXT ROUND</button>
-    </div>
+    <button onclick="resetGame()">RESET GAME</button>
+    <button onclick="addPlayer()">ADD PLAYER</button>
+    <button onclick="removePlayer()">REMOVE PLAYER</button>
+    <button onclick="nextRound()">NEXT ROUND</button>
   </div>
 
-  <script src="script.js"></script>
+  <div class="pot">
+    POT: <span id="pot-value">$0</span>
+  </div>
+
+  <div id="players"></div>
+</div>
+
+<!-- CHIP RAIN -->
+<div id="chipRainLeft" class="chip-rain left"></div>
+<div id="chipRainRight" class="chip-rain right"></div>
+
+<script src="script.js"></script>
 </body>
 </html>

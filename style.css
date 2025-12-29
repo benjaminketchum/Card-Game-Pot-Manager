@@ -1,103 +1,113 @@
 body {
   background: black;
   color: #00ff99;
-  font-family: "Courier New", monospace;
+  font-family: monospace;
   display: flex;
   justify-content: center;
   padding-top: 20px;
 }
 
-#terminal {
-  width: 900px;
-  border: 3px solid #00ff99;
-  padding: 30px;
-  font-size: 18px;
+.terminal {
+  width: 750px;
+  border: 2px solid #00ff99;
+  padding: 20px;
 }
 
 h1 {
   text-align: center;
-  font-size: 32px;
 }
 
-#settings label {
-  margin-right: 20px;
-}
-
-#pot {
-  border: 2px dashed #00ff99;
-  height: 150px;
-  margin: 20px 0;
+.controls {
   display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   justify-content: center;
-  align-items: center;
-  position: relative;
+  margin-bottom: 15px;
 }
 
-#pot-value {
-  font-size: 36px;
-}
-
-.player {
-  border-bottom: 1px solid #00ff99;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.player.broke {
-  color: #550000;
-  background: #220000;
-  animation: flashRed 0.5s alternate 4;
-}
-
-.player.dealer::before {
-  content: "🂡 ";
-  color: #ffff00;
-}
-
-.player.inactive {
-  opacity: 0.35;
-}
-
-.player.winner {
-  animation: flashYellow 0.5s alternate 6;
-}
-
-@keyframes flashRed {
-  from { background: #220000; }
-  to { background: #550000; }
-}
-
-@keyframes flashYellow {
-  from { background: black; }
-  to { background: yellow; color: black; }
-}
-
-.wallet {
-  min-width: 120px;
-  text-align: right;
-}
-
-input[type="number"] {
-  width: 80px;
-  margin-left: 5px;
-}
-
-button {
+input, button {
   background: black;
   color: #00ff99;
   border: 1px solid #00ff99;
-  padding: 5px 10px;
-  cursor: pointer;
-  margin-left: 5px;
+  padding: 5px;
 }
 
 button:hover {
-  background: #003322;
+  background: #00ff99;
+  color: black;
 }
 
-#controls {
-  margin-top: 20px;
+.pot {
   text-align: center;
+  font-size: 22px;
+  margin: 15px 0;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #00ff99;
+  padding: 6px;
+}
+
+.player span {
+  cursor: pointer;
+}
+
+.wallet {
+  width: 90px;
+  text-align: right;
+}
+
+.player input {
+  width: 60px;
+}
+
+.player button {
+  margin-left: 4px;
+}
+
+.broke {
+  opacity: 0.3;
+  color: red;
+}
+
+.dealer {
+  color: #00ccff;
+}
+
+.winner {
+  background: rgba(255, 255, 0, 0.15);
+}
+
+.neon-win {
+  box-shadow: 0 0 8px #00ff99, 0 0 14px #00ff99;
+}
+
+/* ===== CHIP RAIN ===== */
+.chip-rain {
+  position: fixed;
+  top: 0;
+  width: 25%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.chip-rain.left { left: 0; }
+.chip-rain.right { right: 0; }
+
+.chip {
+  position: absolute;
+  top: -40px;
+  animation: fall linear forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(110vh);
+    opacity: 0;
+  }
 }

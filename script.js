@@ -16,16 +16,17 @@ function createPlayer(name) {
     wallet: startingMoney,
     active: true,
     dealer: false,
-    customBet: MIN_BET
+    bet: MIN_BET
   };
 }
 
 const playersDiv = document.getElementById("players");
 const potValue = document.getElementById("pot-value");
 
-// ---------------------- Rendering ----------------------
+/* ========= RENDER ========= */
 function renderPlayers() {
   playersDiv.innerHTML = "";
+
   players.forEach((p, i) => {
     const div = document.createElement("div");
     div.className = `player ${!p.active ? "broke" : ""} ${p.dealer ? "dealer" : ""}`;
@@ -33,93 +34,99 @@ function renderPlayers() {
     div.innerHTML = `
       <span onclick="toggleDealer(${i})">${p.name}</span>
       <span class="wallet" id="wallet-${i}">$${p.wallet}</span>
-      <input type="number" id="bet-${i}" value="${p.customBet}" min="${MIN_BET}" max="${p.wallet}">
+      <input type="number" min="${MIN_BET}" max="${p.wallet}" value="${p.bet}"
+        onchange="pBet(${i}, this.value)">
       <button onclick="allIn(${i})">ALL IN</button>
       <button onclick="declareWinner(${i})">WIN</button>
     `;
+
     playersDiv.appendChild(div);
   });
 }
 
-// ---------------------- Animations ----------------------
+/* ========= BET CONTROL ========= */
+function pBet(i, val) {
+  val = Number(val);
+  if (isNaN(val) || val < MIN_BET) val = MIN_BET;
+  if (val > players[i].wallet) val = players[i].wallet;
+  players[i].bet = val;
+}
+
+/* ========= NUMBER ANIM ========= */
 function animateNumber(el, start, end) {
   let current = start;
   function step() {
     if (current === end) return;
     const diff = end - current;
-    const increment = Math.max(1, Math.floor(Math.abs(diff)/5));
-    current += Math.sign(diff) * increment;
+    current += Math.sign(diff) * Math.max(1, Math.floor(Math.abs(diff) / 3));
     el.textContent = `$${current}`;
-    setTimeout(step, 10);
+    setTimeout(step, 6);
   }
   step();
 }
 
-function updatePot(amount) {
-  const old = pot;
-  pot += amount;
-  animateNumber(potValue, old, pot);
-}
-
-// ---------------------- Game Logic ----------------------
-function takeAntes() {
+/* ========= ROUND ========= */
+function nextRound() {
   MIN_BET = Number(document.getElementById("minBet").value) || 10;
-  
+
   players.forEach((p, i) => {
     if (!p.active) return;
 
-    // enforce minimum bet
-    const input = document.getElementById(`bet-${i}`);
-    let bet = Number(input.value);
-    if (isNaN(bet) || bet < MIN_BET) bet = MIN_BET;
-    if (bet > p.wallet) bet = p.wallet;
+    let bet = Math.max(MIN_BET, p.bet);
+    bet = Math.min(bet, p.wallet);
 
-    p.customBet = bet;
-    const oldWallet = p.wallet;
+    const old = p.wallet;
     p.wallet -= bet;
-    if (p.wallet <= 0) p.active = false;
-    updatePot(bet);
-    animateNumber(document.getElementById(`wallet-${i}`), oldWallet, p.wallet);
+    pot += bet;
+
+    animateNumber(document.getElementById(`wallet-${i}`), old, p.wallet);
+    animateNumber(potValue, pot - bet, pot);
+
+    if (p.wallet < MIN_BET) p.active = false;
   });
 }
 
-function declareWinner(index) {
+/* ========= WIN ========= */
+function declareWinner(i) {
   if (pot === 0) return;
 
-  const winner = players[index];
-  const old = winner.wallet;
-  winner.wallet += pot;
+  const p = players[i];
+  const old = p.wallet;
+  p.wallet += pot;
 
-  const playerDiv = playersDiv.children[index];
-  playerDiv.classList.add("winner");
+  const div = playersDiv.children[i];
+  div.classList.add("winner", "neon-win");
 
-  animateNumber(document.getElementById(`wallet-${index}`), old, winner.wallet);
+  animateNumber(document.getElementById(`wallet-${i}`), old, p.wallet);
+  triggerChipRain();
 
   pot = 0;
   potValue.textContent = "$0";
 
-  // only flashes winner for this round
-  setTimeout(() => playerDiv.classList.remove("winner"), 2000);
+  setTimeout(() => {
+    div.classList.remove("winner", "neon-win");
+  }, 2000);
 }
 
-function allIn(index) {
-  const p = players[index];
-  if (!p.active || p.wallet === 0) return;
+/* ========= ALL IN ========= */
+function allIn(i) {
+  const p = players[i];
+  if (!p.active) return;
 
+  const reserve = 10;
+  if (p.wallet <= reserve) return;
+
+  const amt = p.wallet - reserve;
   const old = p.wallet;
-  updatePot(p.wallet);
-  p.wallet = 0;
-  p.active = false;
-  animateNumber(document.getElementById(`wallet-${index}`), old, p.wallet);
-  renderPlayers();
+
+  p.wallet = reserve;
+  pot += amt;
+
+  animateNumber(document.getElementById(`wallet-${i}`), old, p.wallet);
+  animateNumber(potValue, pot - amt, pot);
 }
 
-function nextRound() {
-  takeAntes();
-  renderPlayers();
-}
-
-// ---------------------- Player Management ----------------------
+/* ========= MGMT ========= */
 function addPlayer() {
   if (players.length >= MAX_PLAYERS) return;
   players.push(createPlayer(`Player ${players.length + 1}`));
@@ -132,13 +139,12 @@ function removePlayer() {
   renderPlayers();
 }
 
-function toggleDealer(index) {
+function toggleDealer(i) {
   players.forEach(p => p.dealer = false);
-  players[index].dealer = true;
+  players[i].dealer = true;
   renderPlayers();
 }
 
-// ---------------------- Game Reset ----------------------
 function resetGame() {
   startingMoney = Number(document.getElementById("startingMoney").value) || 100;
   MIN_BET = Number(document.getElementById("minBet").value) || 10;
@@ -149,12 +155,36 @@ function resetGame() {
     ...p,
     wallet: startingMoney,
     active: true,
-    dealer: i === 0,
-    customBet: MIN_BET
+    bet: MIN_BET,
+    dealer: i === 0
   }));
 
   renderPlayers();
 }
 
-// ---------------------- Init ----------------------
+/* ========= CHIP RAIN ========= */
+function triggerChipRain() {
+  spawn("chipRainLeft");
+  spawn("chipRainRight");
+  setTimeout(() => {
+    chipRainLeft.innerHTML = "";
+    chipRainRight.innerHTML = "";
+  }, 1000);
+}
+
+function spawn(id) {
+  const el = document.getElementById(id);
+  const icons = ["🪙", "♠", "♦", "♣"];
+  for (let i = 0; i < 30; i++) {
+    const c = document.createElement("div");
+    c.className = "chip";
+    c.textContent = icons[Math.floor(Math.random() * icons.length)];
+    c.style.left = Math.random() * 100 + "%";
+    c.style.fontSize = 14 + Math.random() * 12 + "px";
+    c.style.animationDuration = 0.8 + Math.random() * 0.4 + "s";
+    el.appendChild(c);
+  }
+}
+
+/* ========= INIT ========= */
 renderPlayers();
