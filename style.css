@@ -50,6 +50,15 @@ h1 {
   to { background: #550000; }
 }
 
+.player.dealer::before {
+  content: "🂡 ";
+  color: #ffff00;
+}
+
+.player.inactive {
+  opacity: 0.35;
+}
+
 .wallet {
   min-width: 120px;
   text-align: right;
