@@ -47,7 +47,7 @@ function animateNumber(el, start, end) {
   function step() {
     if (current === end) return;
     const diff = end - current;
-    const increment = Math.max(1, Math.floor(Math.abs(diff)/5)); // faster for big numbers
+    const increment = Math.max(1, Math.floor(Math.abs(diff)/5));
     current += Math.sign(diff) * increment;
     el.textContent = `$${current}`;
     setTimeout(step, 10);
@@ -63,10 +63,12 @@ function updatePot(amount) {
 
 // ---------------------- Game Logic ----------------------
 function takeAntes() {
+  MIN_BET = Number(document.getElementById("minBet").value) || 10;
+  
   players.forEach((p, i) => {
     if (!p.active) return;
 
-    // read custom bet or enforce minimum
+    // enforce minimum bet
     const input = document.getElementById(`bet-${i}`);
     let bet = Number(input.value);
     if (isNaN(bet) || bet < MIN_BET) bet = MIN_BET;
@@ -96,7 +98,8 @@ function declareWinner(index) {
   pot = 0;
   potValue.textContent = "$0";
 
-  setTimeout(() => playerDiv.classList.remove("winner"), 3000);
+  // only flashes winner for this round
+  setTimeout(() => playerDiv.classList.remove("winner"), 2000);
 }
 
 function allIn(index) {
